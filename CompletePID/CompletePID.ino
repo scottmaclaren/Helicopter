@@ -6,7 +6,7 @@
  *  - PID constants have not been updated to the latest ones that were physically tested
  */
 
- 
+ //note this will only work after downloading an additional library if we decide to go forward with it. 
 #include <elapsedMillis.h>
 
 // Encoder and Rotational Constants
