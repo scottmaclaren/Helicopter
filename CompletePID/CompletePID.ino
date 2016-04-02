@@ -6,6 +6,9 @@
  *  - PID constants have not been updated to the latest ones that were physically tested
  */
 
+ 
+#include <elapsedMillis.h>
+
 // Encoder and Rotational Constants
 #define encoder0PinA 2
 #define encoder0PinB 3
@@ -63,7 +66,7 @@ void setup() {
 }
 
 void loop(){ 
-
+elapsedMillis timeElapsed;
   if (state == 0){
     //TURN OFF BOTH MOTORS
 
@@ -71,6 +74,13 @@ void loop(){
     yaw_duty = 127;
     analogWrite(yaw_motor, yaw_duty);
     analogWrite(vertical_motor, vert_duty);
+    
+    //we can do a serial read in from the keyboard for the moment
+    Serial.println("Please enter a '1' to begin");
+    state = Serial.read();
+   
+    //or we can use the pushbutton- just change the pin and we need to add a pull down resistor(then unpushed is 0)
+    //state = digitalRead(4)
     
     if(start == 1){ //read in start from keyboard or something to that extent. Pushbutton?
       
@@ -94,11 +104,19 @@ void loop(){
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
     analogWrite(yaw_motor, yaw_duty);
-
-    if(target_reached == true){  
-      state = 2;
-      target_reached == false;
-    }
+    //what we can do for the target reached is we can check the time elasped function after X number of seconds and if 
+    //we can are in a range of tolerance, we can flag the target_reached as true
+    
+    if (timeElapsed > 5000){
+      if (angle > 175 && angle <185){
+        if (timeElapsed > 6000)
+          if (angle > 175 && angle <185)
+            state = 2;
+      }
+      
+      
+      }
+    
   }
   else if(state == 2){
     //Run vertical motor at steady duty cycle of _____
