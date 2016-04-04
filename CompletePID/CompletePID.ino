@@ -350,7 +350,7 @@ double VerticalPID() {
   }
  }
 
-  last_angle = angle;
+  last_angle = angle; 
  
   return int(vert_Motor);
 
