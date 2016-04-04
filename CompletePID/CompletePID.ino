@@ -152,7 +152,12 @@ void loop(){
     // Turn of rotational motor
    
     target_angle = 0;
-
+    
+    current_pot = analogRead(potPin);
+    angle = starting_pot - current_pot; 
+    angle = angle*AnglePerVal;
+    
+  
     vert_duty = VerticalPID();
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
