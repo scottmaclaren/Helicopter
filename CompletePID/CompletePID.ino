@@ -6,6 +6,9 @@
  *  - PID constants have not been updated to the latest ones that were physically tested
  */
 
+ //note this will only work after downloading an additional library if we decide to go forward with it. 
+#include <elapsedMillis.h>
+
 // Encoder and Rotational Constants
 #define encoder0PinA 2
 #define encoder0PinB 3
@@ -22,15 +25,17 @@
 #define thresh 3 
 
 // State machine variables and flags
-char state = 0;
+elapsedMillis timeElapsed;
+int state = 0;
 boolean target_reached = false;
 boolean start = false;
+int letsgo = 0;
 
 // Rotation PID variables
 volatile int encoder0Pos = 0;
 int yaw_duty = 0;
 double desired_yaw, actual_yaw = 0, last_yaw = 0;
-double yaw_error = 0, yaw_Integral = 0, yaw_IntThresh = 30;
+double yaw_error = 0, yaw_Integral = 0, yaw_IntThresh = 90;
 double yaw_Motor = 0;   // Value used to determine duty cycle
 
 // Potentiometer PID variables
@@ -64,6 +69,7 @@ void setup() {
 
 void loop(){ 
 
+
   if (state == 0){
     //TURN OFF BOTH MOTORS
 
@@ -72,17 +78,30 @@ void loop(){
     analogWrite(yaw_motor, yaw_duty);
     analogWrite(vertical_motor, vert_duty);
     
-    if(start == 1){ //read in start from keyboard or something to that extent. Pushbutton?
+//we can do a serial read in from the keyboard for the moment
+    Serial.println("Please enter a '1' to begin");
+  
+    while(Serial.available()==0) { // Wait for User to Input Data  
+    }
+    letsgo=Serial.parseInt(); 
+   
+   Serial.println("Let the good times roll");
+////    //or we can use the pushbutton- just change the pin and we need to add a pull down resistor(then unpushed is 0)
+////    //state = digitalRead(4)
+////    
+    if(letsgo == 1){ //read in start from keyboard or something to that extent. Pushbutton?
       
       state = 1;
-      start == false;
-    }
+      timeElapsed = 0;
+      
+   }
+  
   }
 
   else if(state == 1){
     //Run Vertical PID with target = XX
     //Keep rotational motor off
-
+   
     desired_yaw = 0;
     target_angle = 45;
     
@@ -91,53 +110,92 @@ void loop(){
     angle = angle*AnglePerVal;
     
     vert_duty = VerticalPID();
+    //vert_duty = 255;
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
     analogWrite(yaw_motor, yaw_duty);
-
-    if(target_reached == true){  
+    //what we can do for the target reached is we can check the time elasped function after X number of seconds and if 
+    //we can are in a range of tolerance, we can flag the target_reached as true
+    
+    if (timeElapsed > 3000){
       state = 2;
-      target_reached == false;
-    }
+      timeElapsed = 0;
+
+      }
+      
+      
+      
+    
   }
   else if(state == 2){
     //Run vertical motor at steady duty cycle of _____
     //Run Horizontal PID
-
-    desired_yaw = 180;
+    
+    desired_yaw = 175;
 
     yaw_duty = RotationPID();
     analogWrite(yaw_motor, yaw_duty);
     analogWrite(vertical_motor, vert_duty);
     
-    if(target_reached == true){
+   
+    
+    if (timeElapsed > 15000){
+     timeElapsed = 0;
       state = 3;
-      target_reached = false;
     }
+    
   }
+  
+  
   else if(state == 3){
     //Lower vertical motor: duty cycle = _____
     // Turn of rotational motor
+   
+   // target_angle = 0;
+    
+//    current_pot = analogRead(potPin);
+//    angle = starting_pot - current_pot; 
+//    angle = angle*AnglePerVal;
+//    
+//  
+//    vert_duty = VerticalPID();
+//    yaw_duty = RotationPID();
+//    analogWrite(vertical_motor, vert_duty);
+//    analogWrite(yaw_motor, yaw_duty);
 
     target_angle = 0;
-
+    
+    current_pot = analogRead(potPin);
+    angle = starting_pot - current_pot; 
+    angle = angle*AnglePerVal;
+    
     vert_duty = VerticalPID();
+    //vert_duty = 255;
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
-    analogWrite(yaw_motor, yaw_duty);
+
+
     
     if(target_reached == true){
       state = 0;
-      target_reached = false;
+      
     }
   }
+//had to commment this out or it spits
+//  Serial.print(yaw_duty);
+//  Serial.print(" ");
+//Serial.print(encoder0Pos);
+//  Serial.print(vert_duty);
+//  Serial.println(current_pot);
+//  analogWrite(yaw_motor, yaw_duty);
+Serial.print(timeElapsed);
+Serial.print(" ");
+Serial.print(state);
+Serial.print(" ");
+Serial.print(angle);
+Serial.print(" ");
+Serial.println(vert_duty);
 
-  Serial.print(yaw_duty);
-  Serial.print(" ");
-  Serial.print(encoder0Pos);
-  Serial.print(vert_duty);
-  Serial.println(current_pot);
-  analogWrite(yaw_motor, yaw_duty);
   }
 
 
@@ -172,7 +230,7 @@ void doEncoderA()
   }
   //Serial.println (encoder0Pos, DEC);          
   // use for debugging - remember to comment out
-
+ 
 }
 
 void doEncoderB(){
@@ -205,14 +263,14 @@ void doEncoderB(){
 
 double RotationPID() {
   
-  double PIDScaleFactor = 0.03;
-  double Kp = 5, Ki = 0, Kd = 0;       // PID constants
+  double PIDScaleFactor = 0.05;
+  double Kp = 6.6, Ki = 0.09, Kd = 27;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   actual_yaw = encoder0Pos*YawScaleFactor;
   yaw_error = desired_yaw - actual_yaw;
 
-  if ((abs(yaw_error) < yaw_IntThresh) and (abs(yaw_error) < thresh)){ // prevent integral 'windup'
+  if ((abs(yaw_error) <= yaw_IntThresh) and (abs(yaw_error) >= thresh)){ // prevent integral 'windup'
     yaw_Integral = yaw_Integral + yaw_error; // accumulate the error integral
   }
   /*else {
@@ -231,14 +289,14 @@ double RotationPID() {
 
  if (yaw_Motor > 0){ // Check which direction to go.
   yaw_Motor = 128 + yaw_Motor;
-  if (yaw_Motor  > 255){
-    yaw_Motor = 255;
+  if (yaw_Motor  > 190){
+    yaw_Motor = 190;
   }
  }
  else { // depending on the sign of Error
   yaw_Motor = 127 + yaw_Motor;
-  if (yaw_Motor < 0) {
-    yaw_Motor = 0;
+  if (yaw_Motor < 100) {
+    yaw_Motor = 100;
   }
  }
 
@@ -257,7 +315,7 @@ double RotationPID() {
 double VerticalPID() {
     
   double PIDScaleFactor = 0.15;
-  double Kp = 5, Ki = 0, Kd = 0;       // PID constants
+  double Kp = 26, Ki = 0, Kd = 0;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   vert_error = target_angle - angle;
@@ -287,8 +345,8 @@ double VerticalPID() {
  }
  else { // depending on the sign of Error
   vert_Motor = 127 + vert_Motor;
-  if (vert_Motor < 50) {
-    vert_Motor = 50;
+  if (vert_Motor < 70) {
+    vert_Motor = 70;
   }
  }
 
