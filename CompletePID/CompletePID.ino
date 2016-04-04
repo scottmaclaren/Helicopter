@@ -93,7 +93,7 @@ void loop(){
       
       state = 1;
       timeElapsed = 0;
-      //start == false;
+      
    }
   
   }
@@ -109,15 +109,15 @@ void loop(){
     angle = starting_pot - current_pot; 
     angle = angle*AnglePerVal;
     
-    //vert_duty = VerticalPID();
-    vert_duty = 255;
+    vert_duty = VerticalPID();
+    //vert_duty = 255;
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
     analogWrite(yaw_motor, yaw_duty);
     //what we can do for the target reached is we can check the time elasped function after X number of seconds and if 
     //we can are in a range of tolerance, we can flag the target_reached as true
     
-    if (timeElapsed > 2000){
+    if (timeElapsed > 3000){
       state = 2;
       timeElapsed = 0;
 
@@ -139,7 +139,7 @@ void loop(){
     
    
     
-    if (timeElapsed > 20000){
+    if (timeElapsed > 15000){
      timeElapsed = 0;
       state = 3;
     }
@@ -151,19 +151,28 @@ void loop(){
     //Lower vertical motor: duty cycle = _____
     // Turn of rotational motor
    
+   // target_angle = 0;
+    
+//    current_pot = analogRead(potPin);
+//    angle = starting_pot - current_pot; 
+//    angle = angle*AnglePerVal;
+//    
+//  
+//    vert_duty = VerticalPID();
+//    yaw_duty = RotationPID();
+//    analogWrite(vertical_motor, vert_duty);
+//    analogWrite(yaw_motor, yaw_duty);
+
     target_angle = 0;
     
     current_pot = analogRead(potPin);
     angle = starting_pot - current_pot; 
     angle = angle*AnglePerVal;
     
-  
     vert_duty = VerticalPID();
+    //vert_duty = 255;
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
-    analogWrite(yaw_motor, yaw_duty);
-
-
 
 
     
@@ -183,9 +192,9 @@ Serial.print(timeElapsed);
 Serial.print(" ");
 Serial.print(state);
 Serial.print(" ");
-Serial.print(actual_yaw);
+Serial.print(angle);
 Serial.print(" ");
-Serial.println(yaw_duty);
+Serial.println(vert_duty);
 
   }
 
@@ -306,7 +315,7 @@ double RotationPID() {
 double VerticalPID() {
     
   double PIDScaleFactor = 0.15;
-  double Kp = 5, Ki = 0, Kd = 0;       // PID constants
+  double Kp = 26, Ki = 0, Kd = 0;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   vert_error = target_angle - angle;
@@ -336,8 +345,8 @@ double VerticalPID() {
  }
  else { // depending on the sign of Error
   vert_Motor = 127 + vert_Motor;
-  if (vert_Motor < 50) {
-    vert_Motor = 50;
+  if (vert_Motor < 70) {
+    vert_Motor = 70;
   }
  }
 
