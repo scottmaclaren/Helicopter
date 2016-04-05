@@ -86,15 +86,13 @@ void loop(){
     letsgo=Serial.parseInt(); 
    
    Serial.println("Let the good times roll");
-////    //or we can use the pushbutton- just change the pin and we need to add a pull down resistor(then unpushed is 0)
-////    //state = digitalRead(4)
-////    
+
     if(letsgo == 1){ //read in start from keyboard or something to that extent. Pushbutton?
       
       state = 1;
       timeElapsed = 0;
       
-   }
+    }
   
   }
 
