@@ -43,7 +43,7 @@ int starting_pot, current_pot;
 int vert_duty;
 double target_angle, angle, last_angle;
 int pot_angle = 0;
-double vert_error = 0, vert_Integral = 0, vert_IntThresh = 30;
+double vert_error = 0, vert_Integral = 0, vert_IntThresh = 10;
 double vert_Motor = 0;   // Value used to determine duty cycle
 
 
@@ -103,7 +103,7 @@ void loop(){
     //Keep rotational motor off
    
     desired_yaw = 0;
-    target_angle = 45;
+    target_angle = 35;
     
     current_pot = analogRead(potPin);
     angle = starting_pot - current_pot; 
@@ -117,7 +117,7 @@ void loop(){
     //what we can do for the target reached is we can check the time elasped function after X number of seconds and if 
     //we can are in a range of tolerance, we can flag the target_reached as true
     
-    if (timeElapsed > 3000){
+    if (timeElapsed > 5000){
       state = 2;
       timeElapsed = 0;
 
@@ -163,7 +163,7 @@ void loop(){
 //    analogWrite(vertical_motor, vert_duty);
 //    analogWrite(yaw_motor, yaw_duty);
 
-    target_angle = 0;
+    target_angle = 5;
     
     current_pot = analogRead(potPin);
     angle = starting_pot - current_pot; 
@@ -315,12 +315,12 @@ double RotationPID() {
 double VerticalPID() {
     
   double PIDScaleFactor = 0.15;
-  double Kp = 26, Ki = 0, Kd = 0;       // PID constants
+  double Kp = 25, Ki = 0.2, Kd = 0;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   vert_error = target_angle - angle;
 
-  if ((abs(vert_error) < vert_IntThresh) and (abs(vert_error) > 3*thresh)){ // prevent integral 'windup'
+  if ((abs(vert_error) < vert_IntThresh) and (abs(vert_error) > 2*thresh)){ // prevent integral 'windup'
     vert_Integral = vert_Integral + vert_error; // accumulate the error integral
   }
   /*else {
@@ -345,8 +345,8 @@ double VerticalPID() {
  }
  else { // depending on the sign of Error
   vert_Motor = 127 + vert_Motor;
-  if (vert_Motor < 70) {
-    vert_Motor = 70;
+  if (vert_Motor < 100) {
+    vert_Motor = 100 ;
   }
  }
 
