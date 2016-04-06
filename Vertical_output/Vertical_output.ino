@@ -43,7 +43,7 @@ int starting_pot, current_pot;
 int vert_duty;
 double target_angle, angle, last_angle;
 int pot_angle = 0;
-double vert_error = 0, vert_Integral = 0, vert_IntThresh = 24;
+double vert_error = 0, vert_Integral = 0, vert_IntThresh = 20;
 double vert_Motor = 0;   // Value used to determine duty cycle
 
 
@@ -79,20 +79,13 @@ void loop(){
     analogWrite(vertical_motor, vert_duty);
     
 //we can do a serial read in from the keyboard for the moment
-    Serial.println("Please enter a '1' to begin");
+    
   
-    while(Serial.available()==0) { // Wait for User to Input Data  
-    }
-    letsgo=Serial.parseInt(); 
-   
-   Serial.println("Let the good times roll");
-
-    if(letsgo == 1){ //read in start from keyboard or something to that extent. Pushbutton?
-      
+     delay(1500);
       state = 1;
       timeElapsed = 0;
       
-    }
+    
   
   }
 
@@ -107,7 +100,7 @@ void loop(){
     angle = starting_pot - current_pot; 
     angle = angle*AnglePerVal;
     
-    vert_duty = 254;
+    vert_duty = VerticalPID();
     //vert_duty = 255;
     yaw_duty = RotationPID();
     analogWrite(vertical_motor, vert_duty);
@@ -137,7 +130,7 @@ void loop(){
     
    
     
-    if (timeElapsed > 30000){
+    if (timeElapsed > 15000){
      timeElapsed = 0;
       state = 3;
     }
@@ -187,18 +180,18 @@ void loop(){
   }
 //had to commment this out or it spits
 //  Serial.print(yaw_duty);
- // Serial.print(" ");
-//Serial.println(encoder0Pos);
+//  Serial.print(" ");
+//Serial.print(encoder0Pos);
 //  Serial.print(vert_duty);
 //  Serial.println(current_pot);
 //  analogWrite(yaw_motor, yaw_duty);
-Serial.print(timeElapsed);
-Serial.print(" ");
-Serial.print(state);
-Serial.print(" ");
-Serial.print(angle);
-Serial.print(" ");
-Serial.println(vert_duty);
+//Serial.print(timeElapsed);
+//Serial.print(" ");
+//Serial.print(state);
+//Serial.print(" ");
+Serial.println(angle);
+//Serial.print(" ");
+//Serial.println(vert_duty);
 
   }
 
@@ -268,7 +261,7 @@ void doEncoderB(){
 double RotationPID() {
   
   double PIDScaleFactor = 0.05;
-  double Kp = 5.9, Ki = 0.07, Kd = 27;       // PID constants
+  double Kp = 6.6, Ki = 0.09, Kd = 27;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   actual_yaw = encoder0Pos*YawScaleFactor;
@@ -319,7 +312,7 @@ double RotationPID() {
 double VerticalPID() {
     
   double PIDScaleFactor = 0.13;
-  double Kp = 9, Ki = .7, Kd = 5;       // PID constants
+  double Kp = 28, Ki = 0.2, Kd = 0;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   vert_error = target_angle - angle;
@@ -348,9 +341,9 @@ double VerticalPID() {
   }
  }
  else { // depending on the sign of Error
-  vert_Motor = 160 + vert_Motor;
-  if (vert_Motor < 70) {
-    vert_Motor = 70;
+  vert_Motor = 127 + vert_Motor;
+  if (vert_Motor < 110) {
+    vert_Motor = 110 ;
   }
  }
 

@@ -1,10 +1,10 @@
 #include <elapsedMillis.h>
-elapsedMillis timeElapsed;
 #define encoder0PinA 2
 #define encoder0PinB 3
 #define motor_pin 10
 #define AngleScaleFactor 0.9
 #define vert_motor 6
+elapsedMillis timeElapsed;
 
 int vert_duty = 255;
 
@@ -33,7 +33,7 @@ void setup() {
   Serial.begin (9600);
   encoder0Pos = 0;
   dutyCycle = RotationPID();
-  timeElapsed = 0;
+  timeElapsed=0;
   
 }
 
@@ -42,17 +42,14 @@ void loop(){
   dutyCycle = RotationPID();
   //Serial.print(dutyCycle);
   //Serial.print(" ");
-  
+  Serial.println(actual_angle);
   //delay(100); //added this in for a python test
   //Serial.print(" ");
   //Serial.println(Integral);
   analogWrite(motor_pin, dutyCycle);
   analogWrite(vert_motor, vert_duty);
-
-  if (timeElapsed >100) {
-  Serial.println(actual_angle);
-  timeElapsed = 0;
-  }
+  
+  
   }
 
 void doEncoderA()
