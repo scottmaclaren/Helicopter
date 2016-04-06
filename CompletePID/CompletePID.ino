@@ -137,7 +137,7 @@ void loop(){
     
    
     
-    if (timeElapsed > 30000){
+    if (timeElapsed > 15000){
      timeElapsed = 0;
       state = 3;
     }
@@ -176,7 +176,7 @@ void loop(){
     vert_duty = VerticalPID();
     analogWrite(vertical_motor, vert_duty);
 
-    if (timeElapsed > 5000){
+    if (timeElapsed > 8000){
     vert_duty = 0;
     yaw_duty = 127;
     analogWrite(yaw_motor, yaw_duty);
