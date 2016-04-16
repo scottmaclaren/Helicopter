@@ -137,7 +137,7 @@ void loop(){
     
    
     
-    if (timeElapsed > 15000){
+    if (timeElapsed > 45000){
      timeElapsed = 0;
       state = 3;
     }
@@ -196,7 +196,7 @@ Serial.print(timeElapsed);
 Serial.print(" ");
 Serial.print(state);
 Serial.print(" ");
-Serial.print(angle);
+Serial.println(angle);
 Serial.print(" ");
 Serial.println(vert_duty);
 
@@ -268,7 +268,7 @@ void doEncoderB(){
 double RotationPID() {
   
   double PIDScaleFactor = 0.05;
-  double Kp = 5.9, Ki = 0.07, Kd = 27;       // PID constants
+  double Kp = 5.9, Ki = 0.065, Kd = 27;       // PID constants
   double P = 0, I = 0, D = 0;         //  Proportional, Integral, and Derivative terms to be summed
 
   actual_yaw = encoder0Pos*YawScaleFactor;
